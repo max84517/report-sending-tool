@@ -89,7 +89,7 @@ class DraftEditorWindow(tk.Toplevel):
         tk.Label(hint_row, text="Markdown", bg=BG, fg="#888888",
                  font=("Segoe UI", 9)).pack(side="left")
         tk.Label(hint_row,
-                 text="  Tip: use {supplier} to insert supplier name",
+                 text="  Tip: use {supplier} = supplier name  |  {name} = your name",
                  bg=BG, fg="#555555", font=("Segoe UI", 8)).pack(side="left")
         self._text = tk.Text(left, bg=ENTRY_BG, fg=FG, insertbackground=FG,
                              relief="flat", bd=0, font=("Consolas", 11),
