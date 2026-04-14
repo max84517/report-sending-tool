@@ -27,4 +27,6 @@ Thumbs.db
 .DS_Store
 
 # PyInstaller
-*.spec
+# *.spec   ← keep spec file tracked
+build/
+dist/
