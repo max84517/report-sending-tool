@@ -74,8 +74,13 @@ class DraftEditorWindow(tk.Toplevel):
         # Left — raw markdown editor
         left = tk.Frame(pane, bg=BG)
         pane.add(left, stretch="always")
-        tk.Label(left, text="Markdown", bg=BG, fg="#888888",
-                 font=("Segoe UI", 9)).pack(anchor="w")
+        hint_row = tk.Frame(left, bg=BG)
+        hint_row.pack(fill="x")
+        tk.Label(hint_row, text="Markdown", bg=BG, fg="#888888",
+                 font=("Segoe UI", 9)).pack(side="left")
+        tk.Label(hint_row,
+                 text="  Tip: use {supplier} to insert supplier name",
+                 bg=BG, fg="#555555", font=("Segoe UI", 8)).pack(side="left")
         self._text = tk.Text(left, bg=ENTRY_BG, fg=FG, insertbackground=FG,
                              relief="flat", bd=0, font=("Consolas", 11),
                              undo=True, wrap="word",

@@ -15,6 +15,7 @@ from modules.draft_manager    import load_draft
 from modules.outlook_sender   import send_email
 from ui.contacts_window       import ContactsWindow
 from ui.draft_window          import DraftEditorWindow
+from ui.settings_window       import SettingsWindow
 
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.json")
 
@@ -51,7 +52,8 @@ class MainWindow:
         self.root.minsize(700, 500)
 
         self._folder_var  = tk.StringVar()
-        self._send_mode  = tk.StringVar(value="draft")
+        self._send_mode   = tk.StringVar(value="draft")
+        self._user_name   = tk.StringVar()
         self._report_rows: list[dict] = []  # {filename, supplier, filepath, var(BoolVar)}
 
         self._build_ui()
@@ -115,6 +117,12 @@ class MainWindow:
                                  font=("Segoe UI", 10))
         _style_btn(contacts_btn)
         contacts_btn.pack(side="left", padx=(0, 8))
+
+        settings_btn = tk.Button(action_row, text="⚙  Settings",
+                                 command=self._open_settings,
+                                 font=("Segoe UI", 10))
+        _style_btn(settings_btn)
+        settings_btn.pack(side="left", padx=(0, 8))
 
         # Send mode toggle
         draft_radio = tk.Radiobutton(action_row, text="Save as Draft",
@@ -194,15 +202,21 @@ class MainWindow:
                     cfg = json.load(f)
                 self._folder_var.set(cfg.get("folder_path", ""))
                 self._send_mode.set(cfg.get("send_mode", "draft"))
+                self._user_name.set(cfg.get("user_name", ""))
                 if self._folder_var.get():
                     self._scan()
             except Exception:
                 pass
 
+        # Force user to set name on first launch
+        if not self._user_name.get().strip():
+            self.root.after(200, self._open_settings_required)
+
     def _save_config(self):
         cfg = {
             "folder_path": self._folder_var.get(),
             "send_mode": self._send_mode.get(),
+            "user_name": self._user_name.get().strip(),
         }
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(cfg, f, indent=2)
@@ -285,8 +299,30 @@ class MainWindow:
     def _open_contacts(self):
         ContactsWindow(self.root)
 
+    def _open_settings(self):
+        SettingsWindow(self.root, self._user_name, self._save_config)
+
+    def _open_settings_required(self):
+        """Open settings and block until name is filled in."""
+        messagebox.showinfo(
+            "Setup Required",
+            "Please enter your name in Settings before using the tool.",
+            parent=self.root,
+        )
+        self._open_settings()
+
     # ── Send / Draft ─────────────────────────────────────────────────────────
     def _go(self):
+        # Enforce user name
+        if not self._user_name.get().strip():
+            messagebox.showwarning(
+                "Name Required",
+                "Please set your name in Settings before sending emails.",
+                parent=self.root,
+            )
+            self._open_settings()
+            return
+
         selected = [r for r in self._report_rows if r["var"].get()]
         if not selected:
             messagebox.showinfo("Nothing selected", "Please select at least one report.")
@@ -311,12 +347,12 @@ class MainWindow:
         # Run in thread to keep UI responsive
         threading.Thread(
             target=self._send_thread,
-            args=(selected, subject, body, save_draft_flag),
+            args=(selected, subject, body, save_draft_flag, self._user_name.get().strip()),
             daemon=True
         ).start()
 
     def _send_thread(self, reports: list[dict], subject: str,
-                     body: str, save_as_draft: bool):
+                     body: str, save_as_draft: bool, user_name: str):
         results = {"ok": 0, "skip": 0, "fail": 0, "errors": []}
 
         # Group selected reports by supplier so each supplier gets ONE email
@@ -332,13 +368,15 @@ class MainWindow:
             try:
                 to_list = [c["email"] for c in contacts]
                 attachment_paths = [r["filepath"] for r in supplier_reports]
-                # Prepend greeting and replace placeholders
-                greeting = f"Hi {supplier} Team,\n\n"
-                personalised_body = greeting + body
+                # Build full body: greeting + user body (with {supplier} replaced) + sign-off
+                greeting  = f"Hi {supplier} Team,\n\n"
+                main_body = body.replace("{supplier}", supplier)
+                sign_off  = f"\n\nBest Regards,\n{user_name}"
+                full_body  = greeting + main_body + sign_off
                 send_email(
                     to_addresses     = to_list,
                     subject          = subject,
-                    body_md          = personalised_body,
+                    body_md          = full_body,
                     attachment_paths = attachment_paths,
                     save_as_draft    = save_as_draft,
                 )
