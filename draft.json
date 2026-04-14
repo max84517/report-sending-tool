@@ -1,4 +1,4 @@
 {
   "subject": "Validation Report",
-  "body": "Dear {name},\n\nPlease find the attached validation report.\n\nBest regards"
+  "body": "Dear {supplier},\n\nPlease find the attached validation report for your reference.\n\nPlease let us know if you have any questions."
 }

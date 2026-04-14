@@ -368,11 +368,10 @@ class MainWindow:
             try:
                 to_list = [c["email"] for c in contacts]
                 attachment_paths = [r["filepath"] for r in supplier_reports]
-                # Build full body: greeting + user body (with {supplier} replaced) + sign-off
-                greeting  = f"Hi {supplier} Team,\n\n"
+                # Replace {supplier} in body, then append sign-off
                 main_body = body.replace("{supplier}", supplier)
                 sign_off  = f"\n\nBest Regards,\n{user_name}"
-                full_body  = greeting + main_body + sign_off
+                full_body  = main_body + sign_off
                 send_email(
                     to_addresses     = to_list,
                     subject          = subject,
