@@ -170,22 +170,22 @@ class MainWindow:
         list_outer = tk.Frame(root, bg=PANEL_BG, relief="flat")
         list_outer.pack(fill="both", expand=True, padx=20, pady=(0, 4))
 
-        canvas = tk.Canvas(list_outer, bg=PANEL_BG, highlightthickness=0)
-        self._list_frame = tk.Frame(canvas, bg=PANEL_BG)
-        vsb = ttk.Scrollbar(list_outer, orient="vertical", command=canvas.yview)
-        canvas.configure(yscrollcommand=vsb.set)
+        self._canvas = tk.Canvas(list_outer, bg=PANEL_BG, highlightthickness=0)
+        self._list_frame = tk.Frame(self._canvas, bg=PANEL_BG)
+        vsb = ttk.Scrollbar(list_outer, orient="vertical", command=self._canvas.yview)
+        self._canvas.configure(yscrollcommand=vsb.set)
 
         vsb.pack(side="right", fill="y")
-        canvas.pack(side="left", fill="both", expand=True)
-        self._canvas_win = canvas.create_window((0, 0), window=self._list_frame,
+        self._canvas.pack(side="left", fill="both", expand=True)
+        self._canvas_win = self._canvas.create_window((0, 0), window=self._list_frame,
                                                 anchor="nw")
 
         self._list_frame.bind("<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-        canvas.bind("<Configure>",
-            lambda e: canvas.itemconfig(self._canvas_win, width=e.width))
-        canvas.bind_all("<MouseWheel>",
-            lambda e: canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
+            lambda e: self._canvas.configure(scrollregion=self._canvas.bbox("all")))
+        self._canvas.bind("<Configure>",
+            lambda e: self._canvas.itemconfig(self._canvas_win, width=e.width))
+        self._canvas.bind_all("<MouseWheel>",
+            lambda e: self._canvas.yview_scroll(int(-1 * (e.delta / 120)), "units"))
 
         # ── Status bar ────────────────────────────────────────────────────────
         self._status_var = tk.StringVar(value="Ready.")
@@ -255,6 +255,11 @@ class MainWindow:
             row = {**r, "var": var}
             self._report_rows.append(row)
             self._add_report_row(row)
+
+        # Force canvas to recalculate layout after repopulating
+        self._list_frame.update_idletasks()
+        self._canvas.configure(scrollregion=self._canvas.bbox("all"))
+        self._canvas.yview_moveto(0)
 
         self._status_var.set(f"Scan complete — {len(reports)} report(s) found.")
 
