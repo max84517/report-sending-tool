@@ -1,0 +1,16 @@
+[project]
+name = "report-sending-tool"
+version = "0.1.0"
+description = "One-click Outlook report sending tool with dark-mode Tkinter UI"
+authors = [
+    {name = "max84517"}
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pywin32 (>=306)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
