@@ -369,7 +369,7 @@ class MainWindow:
                 to_list = [c["email"] for c in contacts]
                 attachment_paths = [r["filepath"] for r in supplier_reports]
                 # Replace {supplier} and {name} placeholders in subject and body
-                final_subject = f"Validation Report - {supplier} | " + subject
+                final_subject = subject.replace("{supplier}", supplier)
                 full_body = body.replace("{supplier}", supplier).replace("{name}", user_name)
                 send_email(
                     to_addresses     = to_list,
