@@ -52,8 +52,13 @@ def load_draft() -> dict:
         # Re-create file with defaults so it persists for next time
         save_draft(DEFAULT_SUBJECT, DEFAULT_BODY)
         return {"subject": DEFAULT_SUBJECT, "body": DEFAULT_BODY}
-    with open(DRAFT_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(DRAFT_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, ValueError):
+        # File is corrupted — reset to defaults
+        save_draft(DEFAULT_SUBJECT, DEFAULT_BODY)
+        return {"subject": DEFAULT_SUBJECT, "body": DEFAULT_BODY}
 
 
 def save_draft(subject: str, body: str) -> None:
