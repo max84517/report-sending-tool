@@ -59,7 +59,17 @@ class DraftEditorWindow(tk.Toplevel):
                               bg=ENTRY_BG, fg=FG, insertbackground=FG,
                               relief="flat", bd=1, font=("Segoe UI", 10),
                               highlightbackground=BORDER, highlightthickness=1)
-        subj_entry.pack(side="left", fill="x", expand=True)
+        subj_entry.pack(side="left", fill="x", expand=True, padx=(0, 12))
+
+        discard_btn = tk.Button(subj_frame, text="Discard", command=self.destroy,
+                                font=("Segoe UI", 10))
+        _style_btn(discard_btn)
+        discard_btn.pack(side="right", padx=(4, 0))
+
+        save_btn = tk.Button(subj_frame, text="💾  Save Draft", command=self._save,
+                             font=("Segoe UI", 10, "bold"))
+        _style_btn(save_btn, bg=ACCENT, hover=HOVER)
+        save_btn.pack(side="right")
 
         # Toolbar
         toolbar = tk.Frame(self, bg=TOOLBAR, pady=4)
@@ -102,20 +112,6 @@ class DraftEditorWindow(tk.Toplevel):
         self._setup_preview_tags()
         self._text.bind("<KeyRelease>", lambda e: (self._apply_highlighting(), self._refresh_preview()))
         self._refresh_preview()
-
-        # Bottom buttons
-        btn_row = tk.Frame(self, bg=BG)
-        btn_row.pack(fill="x", padx=16, pady=(0, 14))
-
-        save_btn = tk.Button(btn_row, text="Save Draft", command=self._save,
-                             font=("Segoe UI", 10, "bold"))
-        _style_btn(save_btn, bg=ACCENT, hover=HOVER)
-        save_btn.pack(side="right", padx=(8, 0))
-
-        cancel_btn = tk.Button(btn_row, text="Discard", command=self.destroy,
-                               font=("Segoe UI", 10))
-        _style_btn(cancel_btn)
-        cancel_btn.pack(side="right")
 
         # ── Markdown highlight tags ────────────────────────────────────────────
         self._text.tag_configure("heading", foreground="#569cd6",
