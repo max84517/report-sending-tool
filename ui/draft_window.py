@@ -47,6 +47,7 @@ class DraftEditorWindow(tk.Toplevel):
         self._build_ui()
         self._text.insert("1.0", self._body_md)
         self._apply_highlighting()
+        self._refresh_preview()
 
     # ── Build ─────────────────────────────────────────────────────────────────
     def _build_ui(self):
@@ -97,7 +98,6 @@ class DraftEditorWindow(tk.Toplevel):
                              selectbackground=ACCENT, selectforeground="#ffffff",
                              padx=8, pady=8)
         self._text.pack(fill="both", expand=True)
-        self._text.bind("<KeyRelease>", lambda e: self._apply_highlighting())
 
         # Right — preview
         right = tk.Frame(pane, bg=BG)
@@ -111,7 +111,6 @@ class DraftEditorWindow(tk.Toplevel):
         self._preview.pack(fill="both", expand=True)
         self._setup_preview_tags()
         self._text.bind("<KeyRelease>", lambda e: (self._apply_highlighting(), self._refresh_preview()))
-        self._refresh_preview()
 
         # ── Markdown highlight tags ────────────────────────────────────────────
         self._text.tag_configure("heading", foreground="#569cd6",
